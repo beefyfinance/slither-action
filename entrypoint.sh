@@ -24,6 +24,7 @@ SLITHERCONF="$(get INPUT_SLITHER-CONFIG)"
 SLITHERPLUGINS="$(get INPUT_SLITHER-PLUGINS)"
 STDOUTFILE="/tmp/slither-stdout"
 IGNORECOMPILE="$(get INPUT_IGNORE-COMPILE)"
+SKIPNODE="$(get INPUT_SKIP-NODE)"
 
 # #19 - an user may set SOLC_VERSION in the workflow and cause problems here.
 # Make sure it's unset. If you need to use a different solc version, override
@@ -201,7 +202,9 @@ install_deps()
         pushd "$TARGET" >/dev/null
 
         # JS dependencies
-        if [[ -f package-lock.json ]]; then
+        if [[ $SKIPNODE =~ ^[Tt]rue$ ]]; then
+            echo "[-] Skipping package.json detection and Node.js dependency installation."
+        elif [[ -f package-lock.json ]]; then
             echo "[-] Installing dependencies from package-lock.json"
             npm ci
         elif [[ -f yarn.lock ]]; then
@@ -260,7 +263,9 @@ install_slither
 IGNORECOMPILEFLAG=
 if [[ -z "$IGNORECOMPILE" || $IGNORECOMPILE =~ ^[Ff]alse$ ]]; then
     install_solc
-    install_node
+    if [[ ! $SKIPNODE =~ ^[Tt]rue$ ]]; then
+        install_node
+    fi
     install_foundry
     install_deps
 else
