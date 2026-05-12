@@ -241,8 +241,13 @@ install_deps()
 
         # Foundry dependencies
         if [[ -f foundry.toml ]]; then
-            echo "[-] Installing dependencies from foundry.toml"
-            forge install
+            if [[ -f soldeer.lock ]]; then
+                echo "[-] Soldeer lockfile detected, installing dependencies with 'forge soldeer install'"
+                forge soldeer install
+            else
+                echo "[-] Installing dependencies from foundry.toml"
+                forge install
+            fi
         else
             echo "[-] Did not find a foundry.toml, proceeding without installing Foundry dependencies."
         fi
